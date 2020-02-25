@@ -12,9 +12,9 @@ import org.openqa.selenium.support.Color;
 import java.util.HashSet;
 import java.util.List;
 
-public class NonContextualTest extends BaseTest {
+public class SampleTest extends BaseTest {
 
-    public static final String BASER_URL = "http://localhost:8080";
+    public static final String BASER_URL = "http://qaregression.com";
     public static final String ERROR_PAGE = BASER_URL + "/inaccessible-page/error.html";
     public static final String NO_ERROR_PAGE = BASER_URL + "/index.html";
     public static final String FORM_ERROR_PAGE = BASER_URL + "/inaccessible-page/form-error.html";
@@ -29,12 +29,10 @@ public class NonContextualTest extends BaseTest {
     }
 
     @Test
-    public void blinkingTestNegative() {
-        driver.get(ERROR_PAGE);
-        String htmlSource = driver.getPageSource();
-        if(htmlSource.contains("<blink>") || htmlSource.contains("<marquee>")) {
-            Assert.fail("Blinking Test Present");
-        }
+    public void titleTest() {
+        driver.get(NO_ERROR_PAGE);
+        List<WebElement> elements = driver.findElements(By.xpath("//title"));
+        Assert.assertEquals(1, elements.size());
     }
 
     @Test
@@ -55,18 +53,20 @@ public class NonContextualTest extends BaseTest {
     }
 
     @Test
+    public void blinkingTestNegative() {
+        driver.get(ERROR_PAGE);
+        String htmlSource = driver.getPageSource();
+        if(htmlSource.contains("<blink>") || htmlSource.contains("<marquee>")) {
+            Assert.fail("Blinking Test Present");
+        }
+    }
+
+    @Test
     public void languageAttributeTestNegative() {
         driver.get(ERROR_PAGE);
         WebElement element = driver.findElement(By.xpath("//html"));
         String language = element.getAttribute("lang");
         Assert.assertFalse(language.isEmpty());
-    }
-
-    @Test
-    public void titleTest() {
-        driver.get(NO_ERROR_PAGE);
-        List<WebElement> elements = driver.findElements(By.xpath("//title"));
-        Assert.assertEquals(1, elements.size());
     }
 
     @Test
@@ -131,19 +131,6 @@ public class NonContextualTest extends BaseTest {
     }
 
     @Test
-    public void tableTestNegative() {
-        driver.get(ERROR_PAGE);
-        WebElement table = driver.findElement(By.xpath("//table[@id='table-incorrect']"));
-        List<WebElement> elements = table.findElements(By.tagName("caption"));
-        System.out.println("Size : " + elements.size());
-        boolean isPresent = elements.size() == 1;
-        String summary = table.getAttribute("summary");
-        if (!isPresent && summary.isEmpty()) {
-            Assert.fail("Either caption or table need to be there on table");
-        }
-    }
-
-    @Test
     public void tableHeadersTest() {
         driver.get(ERROR_PAGE);
         List<WebElement> tableHeaders = driver.findElements(By.xpath("//table[@id='table-correct']//th"));
@@ -157,6 +144,19 @@ public class NonContextualTest extends BaseTest {
             if( (headerAttributeText == null) && (roleAttributeText == null) && (scopeAttributeText == null)) {
                 Assert.fail("Table Headers should have attributes to specify row and column headers");
             }
+        }
+    }
+
+    @Test
+    public void tableTestNegative() {
+        driver.get(ERROR_PAGE);
+        WebElement table = driver.findElement(By.xpath("//table[@id='table-incorrect']"));
+        List<WebElement> elements = table.findElements(By.tagName("caption"));
+        System.out.println("Size : " + elements.size());
+        boolean isPresent = elements.size() == 1;
+        String summary = table.getAttribute("summary");
+        if (!isPresent && summary.isEmpty()) {
+            Assert.fail("Either caption or table need to be there on table");
         }
     }
 
@@ -187,7 +187,7 @@ public class NonContextualTest extends BaseTest {
     }
 
     @Test
-    public void formTest() {
+    public void keyboardTrapTest() {
         driver.get(FORM_ERROR_PAGE);
         HashSet<String> identifiers = new HashSet<>();
         WebElement focusedElement = driver.findElement(By.xpath("//input"));
@@ -258,25 +258,6 @@ public class NonContextualTest extends BaseTest {
         }
     }
 
-    @Test
-    public void contrastRatioTestNegative() {
-        driver.get(ERROR_PAGE);
-        List<WebElement> childElements = driver.findElements(By.xpath("//div"));
-        for (WebElement childElement : childElements) {
-            String text = getTextNode(childElement);
-            if(!text.isEmpty()) {
-                String hexColorForeground = Color.fromString(childElement.getCssValue("color")).asHex();
-                String hexColorBackground = getParentBackgroundColor(childElement);
-                System.out.println(hexColorForeground + " | " + hexColorBackground);
-                java.awt.Color foreground = java.awt.Color.decode(hexColorForeground);
-                java.awt.Color background = java.awt.Color.decode(hexColorBackground);
-                double contrastRatio = ContrastChecker.getContrastRatio(foreground, background);
-                System.out.println(contrastRatio + " | " + text);
-                Assert.assertTrue(contrastRatio > 4.5);
-            }
-        }
-    }
-
     public static String getTextNode(WebElement e) {
         String text = e.getText().trim();
         List<WebElement> children = e.findElements(By.xpath("./*"));
@@ -300,6 +281,25 @@ public class NonContextualTest extends BaseTest {
                 } else {
                     return hexColorBackground;
                 }
+            }
+        }
+    }
+
+    @Test
+    public void contrastRatioTestNegative() {
+        driver.get(ERROR_PAGE);
+        List<WebElement> childElements = driver.findElements(By.xpath("//div"));
+        for (WebElement childElement : childElements) {
+            String text = getTextNode(childElement);
+            if(!text.isEmpty()) {
+                String hexColorForeground = Color.fromString(childElement.getCssValue("color")).asHex();
+                String hexColorBackground = getParentBackgroundColor(childElement);
+                System.out.println(hexColorForeground + " | " + hexColorBackground);
+                java.awt.Color foreground = java.awt.Color.decode(hexColorForeground);
+                java.awt.Color background = java.awt.Color.decode(hexColorBackground);
+                double contrastRatio = ContrastChecker.getContrastRatio(foreground, background);
+                System.out.println(contrastRatio + " | " + text);
+                Assert.assertTrue(contrastRatio > 4.5);
             }
         }
     }
