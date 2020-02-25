@@ -5,16 +5,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.concurrent.TimeUnit;
 
 public class BaseTest {
 
-    private static final int TIMEOUT = 10;
     protected WebDriver driver;
 
     @BeforeClass
@@ -25,6 +22,7 @@ public class BaseTest {
     @Before
     public void setupTest() {
         driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.manage().window().maximize();
     }
 
@@ -33,12 +31,6 @@ public class BaseTest {
         if (driver != null) {
             driver.quit();
         }
-    }
-
-    protected void waitToBeClickable(String xPath) {
-        WebElement webElement = driver.findElement(By.xpath(xPath));
-        WebDriverWait webDriverWait = new WebDriverWait(driver, TIMEOUT);
-        webDriverWait.until(ExpectedConditions.elementToBeClickable(webElement));
     }
 
     @Test
